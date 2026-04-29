@@ -12,6 +12,7 @@
   "dependencies": {
     "@prisma/client": "^6.2.1",
     "@ten/database": "workspace:*",
+    "@vercel/blob": "^0.27.0",
     "@ten/shared": "workspace:*",
     "bcryptjs": "^2.4.3",
     "clsx": "^2.1.1",

@@ -23,6 +23,21 @@ class LocalDiskStorage implements ImageStorage {
   }
 }
 
+class VercelBlobStorage implements ImageStorage {
+  async put(file: { buffer: Buffer; mimeType: string }, ownerId: string): Promise<StoredImage> {
+    const { put } = await import("@vercel/blob");
+    const ext = mimeToExt(file.mimeType);
+    const id = crypto.randomBytes(12).toString("hex");
+    const key = `photos/${ownerId}/${id}.${ext}`;
+    const blob = await put(key, file.buffer, {
+      access: "public",
+      contentType: file.mimeType,
+      addRandomSuffix: false,
+    });
+    return { url: blob.url, storageKey: `blob:${key}` };
+  }
+}
+
 function mimeToExt(mime: string): string {
   switch (mime) {
     case "image/jpeg":
@@ -43,17 +58,22 @@ let _storage: ImageStorage | null = null;
 
 export function getStorage(): ImageStorage {
   if (_storage) return _storage;
-  const provider = process.env.IMAGE_STORAGE_PROVIDER ?? "local";
+
+  const explicit = process.env.IMAGE_STORAGE_PROVIDER;
+  const hasBlob = !!process.env.BLOB_READ_WRITE_TOKEN;
+  const provider = explicit ?? (hasBlob ? "blob" : "local");
 
   switch (provider) {
+    case "blob":
+      _storage = new VercelBlobStorage();
+      return _storage;
     case "local":
       _storage = new LocalDiskStorage();
       return _storage;
     default:
-
       console.warn(
         `[storage] provider "${provider}" not implemented, using local disk. ` +
-          `TODO: implement Cloudinary/S3 by replacing getStorage().`,
+          `Set IMAGE_STORAGE_PROVIDER=blob and add a Blob store via "vercel integration add blob".`,
       );
       _storage = new LocalDiskStorage();
       return _storage;
