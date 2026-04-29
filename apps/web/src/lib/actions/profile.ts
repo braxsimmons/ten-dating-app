@@ -78,6 +78,7 @@ export async function uploadPhotoAction(formData: FormData) {
       storageKey: stored.storageKey,
       order: existing,
       isPrimary: existing === 0,
+      moderationStatus: "pending",
     },
   });
 

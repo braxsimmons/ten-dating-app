@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { Logo } from "@/components/Logo";
 import { logoutAction } from "@/lib/actions/auth";
 import { AppDesktopNav, AppBottomTabs } from "@/components/AppNav";
+import { ImpersonationBanner } from "@/components/ImpersonationBanner";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
@@ -12,6 +13,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen bg-ink-50">
+      <ImpersonationBanner />
       <header className="sticky top-0 z-30 border-b border-ink-100 bg-white/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-4">
           <Link href="/app" aria-label="Ten">

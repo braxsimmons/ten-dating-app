@@ -1,11 +1,14 @@
 import { requireUser } from "@/lib/auth";
-import { PRODUCT_LIST, formatPrice } from "@ten/shared";
+import { formatPrice } from "@ten/shared";
+import { getActiveProducts } from "@/lib/products-db";
 import { StoreItem } from "./StoreItem";
 
 export const dynamic = "force-dynamic";
 
 export default async function StorePage() {
   const user = await requireUser();
+  const products = await getActiveProducts();
+
   return (
     <div className="space-y-6">
       <header>
@@ -23,16 +26,20 @@ export default async function StorePage() {
         { id: "swipes" as const, title: "Extra swipes" },
         { id: "rewinds" as const, title: "Rewinds" },
         { id: "double-downs" as const, title: "Double Downs" },
-      ].map((cat) => (
-        <section key={cat.id}>
-          <h2 className="font-display text-xl font-semibold mb-3">{cat.title}</h2>
-          <div className="grid gap-3 sm:grid-cols-3">
-            {PRODUCT_LIST.filter((p) => p.category === cat.id).map((p) => (
-              <StoreItem key={p.id} product={{ ...p, priceLabel: formatPrice(p.priceCents) }} />
-            ))}
-          </div>
-        </section>
-      ))}
+      ].map((cat) => {
+        const items = products.filter((p) => p.category === cat.id);
+        if (items.length === 0) return null;
+        return (
+          <section key={cat.id}>
+            <h2 className="font-display text-xl font-semibold mb-3">{cat.title}</h2>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {items.map((p) => (
+                <StoreItem key={p.id} product={{ ...p, priceLabel: formatPrice(p.priceCents) }} />
+              ))}
+            </div>
+          </section>
+        );
+      })}
     </div>
   );
 }

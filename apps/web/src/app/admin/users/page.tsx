@@ -29,7 +29,10 @@ export default async function AdminUsersPage({
   return (
     <div className="space-y-4">
       <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <h1 className="font-display text-2xl sm:text-3xl font-semibold">Users</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="font-display text-2xl sm:text-3xl font-semibold">Users</h1>
+          <a href="/api/admin/export/users" className="btn-ghost py-1.5 px-3 text-sm">CSV</a>
+        </div>
         <form action="/admin/users" className="flex gap-2">
           <input name="q" defaultValue={q} placeholder="Search email, name..." className="input flex-1 sm:w-72" />
           <button className="btn-primary">Search</button>

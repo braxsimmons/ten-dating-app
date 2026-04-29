@@ -24,7 +24,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <nav className="mx-auto max-w-6xl flex items-center gap-1 text-sm overflow-x-auto no-scrollbar px-2 pb-2">
           <Link href="/admin" className="btn-ghost py-1.5 px-3 whitespace-nowrap">Overview</Link>
           <Link href="/admin/users" className="btn-ghost py-1.5 px-3 whitespace-nowrap">Users</Link>
+          <Link href="/admin/moderation" className="btn-ghost py-1.5 px-3 whitespace-nowrap">Moderation</Link>
           <Link href="/admin/reports" className="btn-ghost py-1.5 px-3 whitespace-nowrap">Reports</Link>
+          <Link href="/admin/revenue" className="btn-ghost py-1.5 px-3 whitespace-nowrap">Revenue</Link>
+          <Link href="/admin/products" className="btn-ghost py-1.5 px-3 whitespace-nowrap">Pricing</Link>
+          <Link href="/admin/prompts" className="btn-ghost py-1.5 px-3 whitespace-nowrap">Prompts</Link>
+          <Link href="/admin/audit" className="btn-ghost py-1.5 px-3 whitespace-nowrap">Audit</Link>
           <Link href="/admin/config" className="btn-ghost py-1.5 px-3 whitespace-nowrap">Config</Link>
         </nav>
       </header>

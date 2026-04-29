@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@ten/database";
-import { GrantCreditsForm, RemovePhotoButton } from "./Controls";
+import { GrantCreditsForm, ImpersonateButton, RemovePhotoButton } from "./Controls";
 
 export const dynamic = "force-dynamic";
 
@@ -28,14 +28,17 @@ export default async function AdminUserDetailPage({
   return (
     <div className="space-y-6">
       <Link href="/admin/users" className="text-sm text-ink-500 hover:underline">← Users</Link>
-      <header className="flex items-center justify-between gap-3">
+      <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl font-semibold">{user.firstName}</h1>
           <p className="text-ink-500">{user.email}</p>
         </div>
-        <div className="text-right text-xs text-ink-500">
-          <div>Joined {user.createdAt.toLocaleDateString()}</div>
-          <div>Last active {user.lastActiveAt.toLocaleDateString()}</div>
+        <div className="flex items-center gap-3">
+          {user.role !== "admin" ? <ImpersonateButton userId={user.id} firstName={user.firstName} /> : null}
+          <div className="text-right text-xs text-ink-500">
+            <div>Joined {user.createdAt.toLocaleDateString()}</div>
+            <div>Last active {user.lastActiveAt.toLocaleDateString()}</div>
+          </div>
         </div>
       </header>
 

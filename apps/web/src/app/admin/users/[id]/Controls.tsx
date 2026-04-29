@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { grantCreditsAction, removePhotoAction } from "@/lib/actions/admin";
+import { startImpersonationAction } from "@/lib/actions/admin-impersonate";
 
 const KINDS = ["extraSwipes", "rewinds", "doubleDowns", "revealNowCredits"] as const;
 
@@ -39,6 +40,22 @@ export function GrantCreditsForm({ userId }: { userId: string }) {
       <button className="btn-primary" disabled={pending}>Grant</button>
       {done ? <span className="text-sm text-emerald-600">{done}</span> : null}
     </form>
+  );
+}
+
+export function ImpersonateButton({ userId, firstName }: { userId: string; firstName: string }) {
+  const [pending, start] = useTransition();
+  return (
+    <button
+      disabled={pending}
+      onClick={() => {
+        if (!confirm(`Impersonate ${firstName}? Every action will be logged.`)) return;
+        start(async () => { await startImpersonationAction(userId); });
+      }}
+      className="btn-ember py-1.5 px-4"
+    >
+      {pending ? "Switching..." : "Impersonate"}
+    </button>
   );
 }
 

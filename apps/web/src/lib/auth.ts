@@ -5,7 +5,9 @@ import { prisma } from "@ten/database";
 import type { Role } from "@ten/database";
 
 const SESSION_COOKIE = "ten_session";
+const IMPERSONATE_COOKIE = "ten_impersonate";
 const SESSION_TTL = 60 * 60 * 24 * 30;
+const IMPERSONATE_TTL = 60 * 60 * 2;
 
 function getSecret() {
   const secret = process.env.AUTH_SECRET;
@@ -70,8 +72,11 @@ export async function getCurrentUser() {
   const session = await getSession();
   if (!session) return null;
 
+  const impersonatedId = await getImpersonatedId();
+  const effectiveId = impersonatedId ?? session.userId;
+
   const user = await prisma.user.findUnique({
-    where: { id: session.userId },
+    where: { id: effectiveId },
     include: {
       profile: true,
       photos: { orderBy: { order: "asc" } },
@@ -80,8 +85,55 @@ export async function getCurrentUser() {
     },
   });
 
-  if (!user || user.isBanned) return null;
+  if (!user) return null;
+  if (user.isBanned && !impersonatedId) return null;
   return user;
+}
+
+export async function getImpersonationContext(): Promise<{ adminId: string; targetUserId: string } | null> {
+  const session = await getSession();
+  if (!session || session.role !== "admin") return null;
+  const targetUserId = await getImpersonatedId();
+  if (!targetUserId) return null;
+  return { adminId: session.userId, targetUserId };
+}
+
+async function getImpersonatedId(): Promise<string | null> {
+  const session = await getSession();
+  if (!session || session.role !== "admin") return null;
+  const store = await cookies();
+  const token = store.get(IMPERSONATE_COOKIE)?.value;
+  if (!token) return null;
+  try {
+    const { payload } = await jwtVerify(token, getSecret());
+    if (typeof payload.targetUserId !== "string" || payload.adminId !== session.userId) return null;
+    return payload.targetUserId;
+  } catch {
+    return null;
+  }
+}
+
+export async function startImpersonation(targetUserId: string) {
+  const session = await getSession();
+  if (!session || session.role !== "admin") throw new Error("FORBIDDEN");
+  const token = await new SignJWT({ targetUserId, adminId: session.userId })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime(`${IMPERSONATE_TTL}s`)
+    .sign(getSecret());
+  const store = await cookies();
+  store.set(IMPERSONATE_COOKIE, token, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: IMPERSONATE_TTL,
+  });
+}
+
+export async function stopImpersonation() {
+  const store = await cookies();
+  store.delete(IMPERSONATE_COOKIE);
 }
 
 export async function requireUser() {

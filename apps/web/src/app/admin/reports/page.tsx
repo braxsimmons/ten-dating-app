@@ -16,7 +16,10 @@ export default async function AdminReportsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="font-display text-3xl font-semibold">Reports</h1>
+      <header className="flex items-center gap-3">
+        <h1 className="font-display text-3xl font-semibold">Reports</h1>
+        <a href="/api/admin/export/reports" className="btn-ghost py-1.5 px-3 text-sm">CSV</a>
+      </header>
 
       <div className="card overflow-x-auto">
         <table className="w-full text-sm min-w-[760px]">

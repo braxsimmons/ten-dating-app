@@ -1,13 +1,14 @@
 "use server";
 
 import { prisma } from "@ten/database";
-import { getProduct } from "@ten/shared";
+import { getProduct as getStaticProduct } from "@ten/shared";
 import { requireUser } from "@/lib/auth";
 import { getStripe, STRIPE_CONFIGURED } from "@/lib/stripe";
+import { getProductFromDb } from "@/lib/products-db";
 
 export async function createCheckoutSession(input: { productId: string }) {
   const user = await requireUser();
-  const product = getProduct(input.productId);
+  const product = (await getProductFromDb(input.productId)) ?? getStaticProduct(input.productId);
   if (!product) return { ok: false as const, error: "Unknown product" };
 
   const purchase = await prisma.purchase.create({
@@ -66,7 +67,7 @@ export async function fulfillPurchase(purchaseId: string) {
   if (!purchase) return;
   if (purchase.status === "paid") return;
 
-  const product = getProduct(purchase.productId);
+  const product = (await getProductFromDb(purchase.productId)) ?? getStaticProduct(purchase.productId);
   if (!product) return;
 
   await prisma.$transaction(async (tx) => {
