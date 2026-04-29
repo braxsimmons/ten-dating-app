@@ -2,6 +2,11 @@
 
 > You get 10 chances a day. Choose wisely.
 
+**Live**: https://ten-dating-app.vercel.app  
+**Repo**: https://github.com/braxsimmons/ten-dating-app
+
+Seeded admin login: `admin@ten.app` / `admin1234`. Sample users: `ava0@ten.app` … `henry19@ten.app`, all with `password123`.
+
 Ten is a dating app built around scarcity, intention, and higher-stakes
 decisions. Every user gets 10 free swipes per day. Out of swipes? Wait until
 midnight, or buy a small pack. No subscriptions. No infinite scroll.
