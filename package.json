@@ -1,0 +1,30 @@
+{
+  "name": "ten",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.28.0",
+  "scripts": {
+    "dev": "pnpm --filter @ten/web dev",
+    "build": "pnpm --filter @ten/database generate && pnpm --filter @ten/web build",
+    "start": "pnpm --filter @ten/web start",
+    "lint": "pnpm --filter @ten/web lint",
+    "db:generate": "pnpm --filter @ten/database generate",
+    "db:push": "pnpm --filter @ten/database push",
+    "db:migrate": "pnpm --filter @ten/database migrate",
+    "db:seed": "pnpm --filter @ten/database seed",
+    "db:studio": "pnpm --filter @ten/database studio"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "esbuild",
+      "prisma",
+      "sharp",
+      "unrs-resolver"
+    ]
+  }
+}

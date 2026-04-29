@@ -1,0 +1,344 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  user
+  admin
+}
+
+enum Gender {
+  woman
+  man
+  nonbinary
+  other
+}
+
+enum Interest {
+  women
+  men
+  everyone
+}
+
+enum DatingIntent {
+  long_term
+  short_term
+  figuring_it_out
+  friends
+  marriage
+}
+
+enum SwipeActionType {
+  like
+  pass
+}
+
+enum ModerationStatus {
+  pending
+  approved
+  rejected
+}
+
+enum ReportStatus {
+  open
+  reviewing
+  resolved
+  dismissed
+}
+
+enum PurchaseStatus {
+  pending
+  paid
+  failed
+  refunded
+}
+
+enum CreditSource {
+  purchase
+  signup_bonus
+  streak_reward
+  admin_grant
+  refund
+  rewind_restore
+}
+
+enum CreditKind {
+  extraSwipes
+  rewinds
+  doubleDowns
+  revealNowCredits
+}
+
+enum AdminActionType {
+  ban_user
+  unban_user
+  remove_photo
+  remove_prompt_answer
+  refund_credit
+  grant_credit
+  resolve_report
+  shadow_ban
+  unshadow_ban
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  firstName     String
+  lastName      String?
+  dateOfBirth   DateTime
+  gender        Gender
+  interestedIn  Interest
+  locationCity  String?
+  locationState String?
+  latitude      Float?
+  longitude     Float?
+  role          Role      @default(user)
+  isBanned      Boolean   @default(false)
+  isShadowBanned Boolean  @default(false)
+  isVerified    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastActiveAt  DateTime  @default(now())
+
+  profile         Profile?
+  photos          ProfilePhoto[]
+  promptAnswers   PromptAnswer[]
+  swipesGiven     SwipeAction[]   @relation("Swiper")
+  swipesReceived  SwipeAction[]   @relation("Target")
+  matchesAsA      Match[]         @relation("UserA")
+  matchesAsB      Match[]         @relation("UserB")
+  unmatched       Match[]         @relation("UnmatchedBy")
+  messagesSent    Message[]
+  wallet          CreditWallet?
+  creditTxns      CreditTransaction[]
+  purchases       Purchase[]
+  dailyUsage      DailySwipeUsage[]
+  reportsMade     Report[]        @relation("Reporter")
+  reportsReceived Report[]        @relation("Reported")
+  reportsReviewed Report[]        @relation("Reviewer")
+  blocksMade      Block[]         @relation("Blocker")
+  blocksReceived  Block[]         @relation("Blocked")
+  adminActionsTaken AdminAction[] @relation("Admin")
+  adminActionsAgainst AdminAction[] @relation("Target")
+
+  @@index([role])
+  @@index([isBanned])
+  @@index([locationCity])
+}
+
+model Profile {
+  id           String        @id @default(cuid())
+  userId       String        @unique
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio          String?
+  datingIntent DatingIntent?
+  height       Int?
+  education    String?
+  work         String?
+  religion     String?
+  lifestyle    String?
+  hiddenTrait  String?
+  isComplete   Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model ProfilePhoto {
+  id               String           @id @default(cuid())
+  userId           String
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  url              String
+  storageKey       String
+  order            Int
+  isPrimary        Boolean          @default(false)
+  moderationStatus ModerationStatus @default(approved)
+  createdAt        DateTime         @default(now())
+
+  @@index([userId, order])
+}
+
+model Prompt {
+  id        String   @id @default(cuid())
+  text      String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  answers PromptAnswer[]
+}
+
+model PromptAnswer {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  promptId  String
+  prompt    Prompt   @relation(fields: [promptId], references: [id])
+  answer    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, promptId])
+  @@index([userId])
+}
+
+model SwipeAction {
+  id           String          @id @default(cuid())
+  swiperId     String
+  swiper       User            @relation("Swiper", fields: [swiperId], references: [id], onDelete: Cascade)
+  targetUserId String
+  target       User            @relation("Target", fields: [targetUserId], references: [id], onDelete: Cascade)
+  action       SwipeActionType
+  isDoubleDown Boolean         @default(false)
+  isRewound    Boolean         @default(false)
+  createdAt    DateTime        @default(now())
+
+  @@unique([swiperId, targetUserId])
+  @@index([targetUserId, action, isRewound])
+  @@index([swiperId, createdAt])
+}
+
+model Match {
+  id            String    @id @default(cuid())
+  userAId       String
+  userA         User      @relation("UserA", fields: [userAId], references: [id], onDelete: Cascade)
+  userBId       String
+  userB         User      @relation("UserB", fields: [userBId], references: [id], onDelete: Cascade)
+  createdAt     DateTime  @default(now())
+  unmatchedAt   DateTime?
+  unmatchedById String?
+  unmatchedBy   User?     @relation("UnmatchedBy", fields: [unmatchedById], references: [id])
+
+  messages Message[]
+
+  @@unique([userAId, userBId])
+  @@index([userAId])
+  @@index([userBId])
+}
+
+model Message {
+  id        String    @id @default(cuid())
+  matchId   String
+  match     Match     @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User      @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  body      String
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([matchId, createdAt])
+}
+
+model CreditWallet {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  extraSwipes      Int      @default(0)
+  rewinds          Int      @default(0)
+  doubleDowns      Int      @default(0)
+  revealNowCredits Int      @default(0)
+  updatedAt        DateTime @updatedAt
+}
+
+model CreditTransaction {
+  id         String       @id @default(cuid())
+  userId     String
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type       CreditKind
+  amount     Int
+  source     CreditSource
+  purchaseId String?
+  createdAt  DateTime     @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model Purchase {
+  id                String         @id @default(cuid())
+  userId            String
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider          String
+  productType       String
+  productId         String
+  amount            Int
+  currency          String         @default("usd")
+  status            PurchaseStatus @default(pending)
+  providerSessionId String?        @unique
+  createdAt         DateTime       @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model DailySwipeUsage {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date           String
+  freeSwipesUsed Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([userId, date])
+}
+
+model Report {
+  id             String       @id @default(cuid())
+  reporterId     String
+  reporter       User         @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reportedUserId String
+  reportedUser   User         @relation("Reported", fields: [reportedUserId], references: [id], onDelete: Cascade)
+  reason         String
+  description    String?
+  status         ReportStatus @default(open)
+  createdAt      DateTime     @default(now())
+  reviewedAt     DateTime?
+  reviewedById   String?
+  reviewedBy     User?        @relation("Reviewer", fields: [reviewedById], references: [id])
+
+  @@index([status, createdAt])
+}
+
+model Block {
+  id             String   @id @default(cuid())
+  blockerId      String
+  blocker        User     @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blockedUserId  String
+  blockedUser    User     @relation("Blocked", fields: [blockedUserId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+
+  @@unique([blockerId, blockedUserId])
+  @@index([blockedUserId])
+}
+
+model FeatureFlag {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       Boolean  @default(false)
+  description String?
+  updatedAt   DateTime @updatedAt
+}
+
+model AppConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model AdminAction {
+  id            String          @id @default(cuid())
+  adminUserId   String
+  adminUser     User            @relation("Admin", fields: [adminUserId], references: [id], onDelete: Cascade)
+  targetUserId  String?
+  targetUser    User?           @relation("Target", fields: [targetUserId], references: [id])
+  action        AdminActionType
+  notes         String?
+  createdAt     DateTime        @default(now())
+
+  @@index([adminUserId, createdAt])
+}
