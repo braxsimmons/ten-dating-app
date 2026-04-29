@@ -90,7 +90,7 @@ function PhotoSection({ photos }: { photos: { id: string; url: string; isPrimary
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
         {photos.map((p, i) => (
           <div key={p.id} className="relative aspect-[3/4] rounded-xl overflow-hidden bg-ink-100 group">
-            <Image src={p.url} alt={`Photo ${i + 1}`} fill sizes="200px" className="object-cover" />
+            <Image src={p.url} alt={`Photo ${i + 1}`} fill sizes="200px" className="object-cover" unoptimized />
             {p.isPrimary ? (
               <span className="absolute top-2 left-2 pill bg-white text-ink-700 text-[10px]">Cover</span>
             ) : null}

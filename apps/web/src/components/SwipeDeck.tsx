@@ -247,7 +247,7 @@ function Card({
     >
       {photo ? (
 
-        <Image src={photo} alt={card.firstName} fill sizes="(max-width: 768px) 100vw, 600px" className="object-cover" priority={!compact} />
+        <Image src={photo} alt={card.firstName} fill sizes="(max-width: 768px) 100vw, 600px" className="object-cover" priority={!compact} unoptimized />
       ) : (
         <div className="absolute inset-0 bg-gradient-to-b from-ink-300 to-ink-500" />
       )}

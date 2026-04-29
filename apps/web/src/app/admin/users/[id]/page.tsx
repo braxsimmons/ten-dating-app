@@ -57,7 +57,7 @@ export default async function AdminUserDetailPage({
         <div className="mt-3 grid grid-cols-3 sm:grid-cols-5 gap-2">
           {user.photos.map((p) => (
             <div key={p.id} className="relative aspect-[3/4] rounded-xl overflow-hidden bg-ink-100 group">
-              <Image src={p.url} alt="" fill sizes="200px" className="object-cover" />
+              <Image src={p.url} alt="" fill sizes="200px" className="object-cover" unoptimized />
               <RemovePhotoButton photoId={p.id} />
             </div>
           ))}

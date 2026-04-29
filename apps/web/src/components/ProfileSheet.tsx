@@ -42,7 +42,7 @@ export function ProfileSheet({
           <div className="grid gap-3 sm:grid-cols-2">
             {card.photos.map((p, i) => (
               <div key={p.id} className="relative aspect-[3/4] rounded-card overflow-hidden bg-ink-100">
-                <Image src={p.url} alt={`${card.firstName} ${i + 1}`} fill sizes="(max-width: 768px) 100vw, 400px" className="object-cover" />
+                <Image src={p.url} alt={`${card.firstName} ${i + 1}`} fill sizes="(max-width: 768px) 100vw, 400px" className="object-cover" unoptimized />
               </div>
             ))}
           </div>

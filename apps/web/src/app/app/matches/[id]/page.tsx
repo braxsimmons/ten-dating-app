@@ -36,7 +36,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <div className="relative h-10 w-10 rounded-full overflow-hidden bg-ink-200">
             {other.photos[0] ? (
-              <Image src={other.photos[0].url} alt={other.firstName} fill sizes="40px" className="object-cover" />
+              <Image src={other.photos[0].url} alt={other.firstName} fill sizes="40px" className="object-cover" unoptimized />
             ) : null}
           </div>
           <div className="min-w-0">

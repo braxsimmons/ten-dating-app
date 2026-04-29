@@ -46,7 +46,7 @@ export default async function MatchesPage() {
             className="card flex items-center gap-4 p-4 hover:border-ember transition"
           >
             <div className="relative h-14 w-14 rounded-full overflow-hidden bg-ink-200 shrink-0">
-              {photo ? <Image src={photo} alt={other.firstName} fill sizes="56px" className="object-cover" /> : null}
+              {photo ? <Image src={photo} alt={other.firstName} fill sizes="56px" className="object-cover" unoptimized /> : null}
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-medium">

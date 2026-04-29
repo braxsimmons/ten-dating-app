@@ -23,7 +23,7 @@ export function MatchModal({ card, onClose }: { card: FeedCard; onClose: () => v
         <div className="mt-8 flex justify-center">
           {photo ? (
             <div className="relative h-32 w-32 rounded-full overflow-hidden ring-4 ring-ember">
-              <Image src={photo} alt={card.firstName} fill sizes="128px" className="object-cover" />
+              <Image src={photo} alt={card.firstName} fill sizes="128px" className="object-cover" unoptimized />
             </div>
           ) : null}
         </div>

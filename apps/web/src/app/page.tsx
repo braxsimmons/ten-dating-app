@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Logo } from "@/components/Logo";
 import { TAGLINE, PRODUCT_LIST, formatPrice } from "@ten/shared";
 
@@ -72,25 +73,72 @@ function Hero() {
   );
 }
 
+function pollinationsHeroUrl(person: { name: string; prompt: string }, w = 600, h = 800): string {
+  const seed = stableSeed(`${person.name}-0`);
+  const params = new URLSearchParams({
+    model: "flux",
+    width: String(w),
+    height: String(h),
+    seed: String(seed),
+    nologo: "true",
+    enhance: "true",
+  });
+  return `https://image.pollinations.ai/prompt/${encodeURIComponent(person.prompt)}?${params.toString()}`;
+}
+
+function stableSeed(input: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < input.length; i++) {
+    h ^= input.charCodeAt(i);
+    h = (h * 16777619) >>> 0;
+  }
+  return h;
+}
+
 function HeroDeck() {
+  const HERO_FACES = [
+    {
+      name: "Aisha, 26",
+      city: "Brooklyn, NY",
+      offset: "translate-x-6 translate-y-6 rotate-3",
+      prompt: "26 year old woman, centered portrait, sunny park in spring, yellow sundress, natural curls, open laughing smile, natural lighting, shot on 35mm film, shallow depth of field, photorealistic dating app profile photo, high quality",
+    },
+    {
+      name: "Jordan, 29",
+      city: "Brooklyn, NY",
+      offset: "translate-x-3 translate-y-3 -rotate-2",
+      prompt: "29 year old man, centered portrait, industrial kitchen window light, navy henley, short dark hair light stubble, amused half-smile, natural lighting, shot on 35mm film, shallow depth of field, photorealistic dating app profile photo, high quality",
+    },
+    {
+      name: "Maya, 27",
+      city: "Brooklyn, NY",
+      offset: "",
+      prompt: "27 year old woman, centered portrait, rooftop in Brooklyn at golden hour, linen shirt and jeans, long dark wavy hair, warm genuine smile, natural lighting, shot on 35mm film, shallow depth of field, photorealistic dating app profile photo, high quality",
+    },
+  ];
+
   return (
     <div className="relative mx-auto h-[380px] sm:h-[440px] md:h-[500px] w-full max-w-xs md:max-w-sm">
-      {[
-        { name: "Maya, 27", color: "bg-ember-200", offset: "translate-x-6 translate-y-6 rotate-3" },
-        { name: "Jordan, 29", color: "bg-ink-200", offset: "translate-x-3 translate-y-3 -rotate-2" },
-        { name: "Aisha, 26", color: "bg-white", offset: "" },
-      ].map((c, i) => (
+      {HERO_FACES.map((c, i) => (
         <div
           key={c.name}
-          className={`absolute inset-0 ${c.offset} rounded-card shadow-card border border-ink-100 overflow-hidden`}
+          className={`absolute inset-0 ${c.offset} rounded-card shadow-card border border-ink-100 overflow-hidden bg-ink-200`}
           style={{ zIndex: i }}
         >
-          <div className={`h-full w-full ${c.color} flex flex-col justify-end p-6 bg-gradient-to-b from-transparent to-black/40`}>
-            <div className="text-white">
-              <p className="text-xs font-medium opacity-80">5 of 10 left today</p>
-              <p className="font-display text-2xl font-semibold">{c.name}</p>
-              <p className="text-sm opacity-90">Brooklyn, NY · 2 mi</p>
-            </div>
+          <Image
+            src={pollinationsHeroUrl(c)}
+            alt={c.name}
+            fill
+            sizes="(max-width: 768px) 100vw, 400px"
+            className="object-cover"
+            priority={i === HERO_FACES.length - 1}
+            unoptimized
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60" />
+          <div className="absolute bottom-0 p-6 text-white">
+            <p className="text-xs font-medium opacity-80">5 of 10 left today</p>
+            <p className="font-display text-2xl font-semibold">{c.name}</p>
+            <p className="text-sm opacity-90">{c.city} · 2 mi</p>
           </div>
         </div>
       ))}
